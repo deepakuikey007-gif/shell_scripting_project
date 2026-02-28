@@ -101,9 +101,9 @@ echo "####################################################"
 echo "CPU usage"
 echo "####################################################"
 echo
-#cpu_usage_value=100-()
-((cpu_used=100-$(mpstat | awk 'NR==4{print $NF}'| awk -F. '{print $1}')))
-cpu_idle=$(mpstat | awk 'NR==4{print $NF}')
+
+cpu_used=$(top -bn1 | grep "%Cpu(s)" | awk -F[:,] '{print 100-$5}')
+cpu_idle=$(top -bn1 | grep "%Cpu(s)" | awk '{print $8}' | cut -d. -f1)
 
 if [[ $cpu_idle -le 20 ]]
 then
