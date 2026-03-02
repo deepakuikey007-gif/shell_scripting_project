@@ -55,23 +55,34 @@ else
 fi
 
 echo "####################################################"
-echo "Memory usage"
+echo "Memory usage in MB"
 echo "####################################################"
 echo
-if [[ $memory_avail -le 200 ]]
+
+mem_total=$(cat /proc/meminfo | awk '/MemTotal/{print $2}')
+mem_avail=$(cat /proc/meminfo | awk '/MemAvailable/{print $2}')
+mem_free=$(cat /proc/meminfo | awk '/MemFree/{print $2}')
+mem_total_free=$(($mem_avail+$mem_free))
+mem_used=$(($mem_total-$mem_total_free))
+mem_free_per=$(($mem_total_free*100/$mem_total))
+mem_threshold=20
+
+if [[ $mem_free_per -le mem_threshold ]]
 then
         echo "Memory usage is Critical"
-        echo "Memory size is:$memory_total"
-        echo "Used Memory is:$memory_used"
-        echo "Available Memory is:$memory_avail"
-        echo "Free memory is:$memory_free"
+	echo "Memory size is:$(($mem_total/1024))"
+        echo "Used Memory is:$(($mem_used/1024))"
+        echo "Available Memory is:$(($mem_avail/1024))"
+        echo "Free memory is:$(($mem_free/1024))"
+	echo "Total free memory is:$(($mem_total_free/1024))"
 	echo
 else
         echo "Memory usage is Normal"
-        echo "Memory size is:$memory_total"
-        echo "Used Memory is:$memory_used"
-        echo "Available Memory is:$memory_avail"
-        echo "Free memory is:$memory_free"
+	echo "Memory size is:$(($mem_total/1024))"
+        echo "Used Memory is:$(($mem_used/1024))"
+        echo "Available Memory is:$(($mem_avail/1024))"
+        echo "Free memory is:$(($mem_free/1024))"
+        echo "Total free memory is:$(($mem_total_free/1024))"
 	echo
 fi
 
