@@ -144,3 +144,19 @@ else
         echo "5min Load AVG is:$load_avg15m"
         echo
 fi
+
+top_cpu_p=$(ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%cpu | head -n 5)
+top_mem_p=$(ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%mem | head -n 5)
+
+echo "####################################################"
+echo "Top 5 Cpu and Menmory consuming processes"
+echo "####################################################"
+echo
+echo "Total Running processes are:$(ps -aux | wc -l)"
+echo
+echo "Top 5 Cpu consuming processes->"
+echo "$top_cpu_p"
+echo
+echo "Top 5 Memory consuming processes->"
+echo "$top_mem_p"
+
