@@ -2,6 +2,7 @@
 #declare -A myarray
 ## comment added by admin user
 ## comment added by new admin user
+## this comment is added by deepak.uikey local user.
 root_uti=$(df -h / | awk 'NR==2 {print $5}' | cut -d% -f1)
 root_used=$(df -h / | awk 'NR==2 {print $3}')
 root_avail=$(df -h / | awk 'NR==2 {print $4}')
