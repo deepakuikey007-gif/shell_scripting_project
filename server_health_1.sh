@@ -17,6 +17,7 @@ memory_total=$(free -m | awk 'NR==2{ print $2}')
 memory_used=$(free -m | awk 'NR==2{ print $3}')
 memory_avail=$(free -m | awk 'NR==2{ print $7}')
 memory_free=$(free -m | awk 'NR==2{ print $4}')
+mb_convert=1024
 
 echo "####################################################"
 echo "Root partition usage"
@@ -75,19 +76,19 @@ mem_threshold=20
 if [[ $mem_free_per -le mem_threshold ]]
 then
         echo "Memory usage is Critical"
-	echo "Memory size is:$(($mem_total/1024))"
-        echo "Used Memory is:$(($mem_used/1024))"
-        echo "Available Memory is:$(($mem_avail/1024))"
-        echo "Free memory is:$(($mem_free/1024))"
-	echo "Total free memory is:$(($mem_total_free/1024))"
+	echo "Memory size is:$(($mem_total/$mb_convert))"
+        echo "Used Memory is:$(($mem_used/$mb_convert))"
+        echo "Available Memory is:$(($mem_avail/$mb_convert))"
+        echo "Free memory is:$(($mem_free/$mb_convert))"
+	echo "Total free memory is:$(($mem_total_free/$mb_convert))"
 	echo
 else
         echo "Memory usage is Normal"
-	echo "Memory size is:$(($mem_total/1024))"
-        echo "Used Memory is:$(($mem_used/1024))"
-        echo "Available Memory is:$(($mem_avail/1024))"
-        echo "Free memory is:$(($mem_free/1024))"
-        echo "Total free memory is:$(($mem_total_free/1024))"
+	echo "Memory size is:$(($mem_total/$mb_convert))"
+        echo "Used Memory is:$(($mem_used/$mb_convert))"
+        echo "Available Memory is:$(($mem_avail/$mb_convert))"
+        echo "Free memory is:$(($mem_free/$mb_convert))"
+        echo "Total free memory is:$(($mem_total_free/$mb_convert))"
 	echo
 fi
 
