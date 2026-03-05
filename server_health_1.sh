@@ -64,9 +64,9 @@ mem_free=$(cat /proc/meminfo | awk '/MemFree/{print $2}')
 mem_total_free=$(($mem_avail+$mem_free))
 mem_used=$(($mem_total-$mem_total_free))
 mem_free_per=$(($mem_total_free*100/$mem_total))
-mem_threshold=20
+threshold=20
 
-if [[ $mem_free_per -le mem_threshold ]]
+if [[ $mem_free_per -le $threshold ]]
 then
         echo "Memory usage is Critical"
 	echo "Memory size is:$(($mem_total/1024))"
@@ -86,24 +86,25 @@ else
 fi
 
 echo "####################################################"
-echo "Swap usage"
+echo "Swap usage in MB"
 echo "####################################################"
 echo
-swap_total=$(free -m | awk 'NR==3{ print $2}')
-swap_used=$(free -m | awk 'NR==3{ print $3}')
-swap_free=$(free -m | awk 'NR==3{ print $4}')
-if [[ $swap_free -le 1024 ]]
+swap_total=$(cat /proc/meminfo | awk '/SwapTotal/{print $2}')
+swap_free=$(cat /proc/meminfo | awk '/SwapFree/{print $2}')
+swap_used=$(($swap_total-$swap_free))
+swap_free_percentage=$(($swap_free*100/$swap_total))
+if [[ $swap_free_percentage -le $threshold ]]
 then
 	echo "Swap usage is Critical"
-        echo "Swap size is:$swap_total"
-        echo "Used Swap is:$swap_used"
-        echo "Free Swap is:$swap_free"
+	echo "Swap size is:$(($swap_total/1024))"
+	echo "Used Swap is:$(($swap_used/1024))"
+	echo "Free Swap is:$(($swap_free/1024))"
 	echo
 else
 	echo "Swap usage is Normal"
-        echo "Swap size is:$swap_total"
-        echo "Used Swap is:$swap_used"
-        echo "Free Swap is:$swap_free"
+        echo "Swap size is:$(($swap_total/1024))"
+        echo "Used Swap is:$(($swap_used/1024))"
+        echo "Free Swap is:$(($swap_free/1024))"
 	echo
 fi
 
