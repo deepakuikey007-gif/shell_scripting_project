@@ -1,4 +1,12 @@
 #!/bin/bash
+set -e
+echo
+echo "####################################################"
+echo "Log file is saved at '/var/log/'"
+echo "####################################################"
+logfile=/var/log/server_health_$(date '+%d-%m-%Y_%H:%M:%S').txt
+exec >> "$logfile" 2>&1
+
 root_uti=$(df -h / | awk 'NR==2 {print $5}' | cut -d% -f1)
 root_used=$(df -h / | awk 'NR==2 {print $3}')
 root_avail=$(df -h / | awk 'NR==2 {print $4}')
