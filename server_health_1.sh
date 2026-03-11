@@ -141,8 +141,9 @@ echo
 load_avg1m=$(uptime | awk -F 'load average:' '{print $2}' | awk -F, '{print $1}' | cut -d. -f1)
 load_avg5m=$(uptime | awk -F 'load average:' '{print $2}' | awk -F, '{print $2}' | cut -d. -f1)
 load_avg15m=$(uptime | awk -F 'load average:' '{print $2}' | awk -F, '{print $3}'| cut -d. -f1)
+cpu_count=$(nproc)
 
-if [[ $load_avg1m -ge 2 ]]
+if [[ $load_avg1m -ge $cpu_count ]]
 then
 	echo "1min Load AVG is Critical"
         echo "1min Load AVG is:$load_avg1m"
