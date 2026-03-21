@@ -21,6 +21,8 @@ memory_avail=$(free -m | awk 'NR==2{ print $7}')
 memory_free=$(free -m | awk 'NR==2{ print $4}')
 mb_convert=1024
 
+echo
+echo "Server health report of $(date)"
 echo "####################################################"
 echo "Root partition usage"
 echo "####################################################"
