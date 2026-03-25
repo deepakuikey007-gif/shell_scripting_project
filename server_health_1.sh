@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-logfile=/var/log/server_health_date_$(date '+%d-%b-%Y')_Time_$(date '+%H_%M_%S').txt
+logfile=/var/log/server_health_report/server_health_date_$(date '+%d-%b-%Y')_Time_$(date '+%H_%M_%S').txt
 echo
 echo "####################################################"
 echo "Log file is saved at '$logfile'"
