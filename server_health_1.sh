@@ -1,10 +1,10 @@
 #!/bin/bash
 set -euo pipefail
+logfile=/var/log/server_health_date_$(date '+%d-%b-%Y')_Time_$(date '+%H_%M_%S').txt
 echo
 echo "####################################################"
-echo "Log file is saved at '/var/log/'"
+echo "Log file is saved at '$logfile'"
 echo "####################################################"
-logfile=/var/log/server_health_$(date '+%d-%m-%Y_%H:%M:%S').txt
 exec >> "$logfile" 2>&1
 
 root_uti=$(df -h / | awk 'NR==2 {print $5}' | cut -d% -f1)
