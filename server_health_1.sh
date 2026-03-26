@@ -162,9 +162,6 @@ echo "Cpu Load Average"
 echo "####################################################"
 echo
 
-#load_avg1m=$(top -bn1 | grep "load average:" | awk '{print $10}' | cut -d. -f1)
-#load_avg5m=$(top -bn1 | grep "load average:" | awk '{print $11}' | cut -d. -f1)
-#load_avg15m=$(top -bn1 | grep "load average:" | awk '{print $12}' | cut -d. -f1)
 load_avg1m=$(uptime | awk -F 'load average:' '{print $2}' | awk -F, '{print $1}' | cut -d. -f1)
 load_avg5m=$(uptime | awk -F 'load average:' '{print $2}' | awk -F, '{print $2}' | cut -d. -f1)
 load_avg15m=$(uptime | awk -F 'load average:' '{print $2}' | awk -F, '{print $3}'| cut -d. -f1)
