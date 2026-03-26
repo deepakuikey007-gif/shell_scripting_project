@@ -5,6 +5,23 @@ echo
 echo "####################################################"
 echo "Log file is saved at '$logfile'"
 echo "####################################################"
+
+## Defining log rotation
+logdir=/var/log/server_health_report/
+if [ -d $logdir ]
+then
+	log_dir_size=$(du -s /var/log/server_health_report | awk '{print $1}')
+	log_file_count=$(find $logdir -type f | wc -l)
+	if [[ $log_dir_size -gt 10485760 ]] || [[ $log_file_count -gt 50 ]]
+	then
+		find $logdir -name "server_health_*.txt" -type f -mtime +2 | xargs /bin/rm -f
+	fi
+else
+	echo "Log directory does not exist!"
+	echo "Creating log Directory ---------------------------->>>>>>>>>>>>>>>>>>>>>."
+	mkdir -p $logdir
+fi
+
 exec >> "$logfile" 2>&1
 
 root_uti=$(df -h / | awk 'NR==2 {print $5}' | cut -d% -f1)
