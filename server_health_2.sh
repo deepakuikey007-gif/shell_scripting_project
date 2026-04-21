@@ -1,15 +1,41 @@
 #!/bin/bash
 
 ## Strict mode
-set -eou pipefail
+set -euo pipefail
 
 ## Path for cron safety
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 ## Defining log file
-logfile=/var/log/server_health_report/server_health_report.log
 
-exec >> $logfile 2>&1
+logfile=/var/log/server_health_report/server_health_report.log
+logdir=/var/log/server_health_report/
+
+## Function for Log Directory validation
+log_dir_validation(){
+if [[ -d $logdir ]]
+then
+	log_file_size=$(du -s /var/log/server_health_report/server_health_report.log | awk '{print $1}')
+	log "OK : Log file size is $log_file_size KB."
+else
+	log "Creating log directory............................"
+	mkdir -p $logdir
+	log "Log directory created............................."
+fi
+}
+
+## Function for Log Rotation
+log_rotation(){
+if [[ $log_file_size -gt 1048576 ]]
+then
+	> "$logfile"
+else
+
+	log "OK : Log size is normal no need for rotation."
+fi
+}
+
+exec >> "$logfile" 2>&1
 
 echo "============================== $(date '+%F %T') =============================="
 
@@ -24,14 +50,16 @@ critical_flag=0
 ## Function for Disk usage
 disk_usage(){
 log "Checking Disk Usage...................."
-root_size=$(df -h / | awk 'NR==2 {print $2}')
-root_uti=$(df -h / | awk 'NR==2 {print $5}' | cut -d% -f1)
-root_used=$(df -h / | awk 'NR==2 {print $3}')
-root_available=$(df -h / | awk 'NR==2 {print $4}')
-boot_uti=$(df -h /boot | awk 'NR==2 {print $5}' | cut -d% -f1)
-boot_used=$(df -h /boot | awk 'NR==2 {print $3}')
-boot_avail=$(df -h /boot | awk 'NR==2 {print $4}')
-boot_size=$(df -h /boot | awk 'NR==2 {print $2}')
+root_info=$(df -h / | awk 'NR==2')
+root_size=$(echo $root_info | awk '{print $2}')
+root_uti=$(echo $root_info | awk '{print $5}' | cut -d% -f1)
+root_used=$(echo $root_info | awk '{print $3}')
+root_available=$(echo $root_info | awk '{print $4}')
+boot_info=$(df -h /boot | awk 'NR==2')
+boot_uti=$(echo $boot_info | awk '{print $5}' | cut -d% -f1)
+boot_used=$(echo $boot_info | awk '{print $3}')
+boot_avail=$(echo $boot_info | awk '{print $4}')
+boot_size=$(echo $boot_info | awk '{print $2}')
 
 if [[ $root_uti -gt 80 ]]
 then
@@ -84,6 +112,12 @@ swap_free=$(cat /proc/meminfo | awk '/SwapFree/{print $2}')
 swap_used=$(($swap_total-$swap_free))
 swap_used_percentage=$(($swap_used*100/$swap_total))
 
+if [[ $swap_total -eq 0 ]]
+then
+	log "No swap cofigured"
+	return
+fi
+
 if [[ $swap_used_percentage -gt 80 ]]
 then
 	log "Critical: Swap usage is $swap_used_percentage%"
@@ -91,7 +125,66 @@ then
 else
 	log "Normal: Swap usage is $swap_used_percentage%"
 fi
+
+log "swap_total : $swap_total KB  used : $swap_used KB  available: $swap_free KB"
 }
 
+## Function for CPU usage
+cpu_usage(){
+log "Checking cpu Usage...................."
+cpu_idle=$(mpstat | awk 'NR==4 {print $NF}'| cut -d. -f1)
+cpu_used=$(( 100 - $cpu_idle ))
+if [[ $cpu_used -gt 80 ]]
+then
+	log "Critical: CPU usage is $cpu_used%"
+	critical_flag=1
+else
+	log "Normal: CPU usage is $cpu_used%"
+fi
+
+log "CPU USED : $cpu_used% CPU FREE : $cpu_idle%"
+}
+
+## Function for Load average
+load_average(){
+log "Checking Load average...................."
+load_avg=$(cat /proc/loadavg | awk '{print $1}' | cut -d. -f1)
+cpu_count=$(nproc)
+if [[ $load_avg > $cpu_count ]]
+then
+	log "Critical: Load average is $load_avg"
+	critical_flag=1
+else
+	log "Normal: Load average is $load_avg"
+fi
+}
+
+## Function for Top processes
+top_processes(){
+log "Checking Top processes...................."
+ps -eo pid,ppid,stat,comm,%cpu,%mem --sort -%cpu | head -n 5
+echo
+ps -eo pid,ppid,stat,comm,%cpu,%mem --sort -%mem | head -n 5
+
+}
+
+main(){
+log_dir_validation
+log_rotation
 disk_usage
 memory_usage
+swap_usage
+cpu_usage
+load_average
+top_processes
+
+if [[ $critical_flag == 1 ]]
+then
+	log "FINAL STATUS: CRITICAL"
+	exit 1
+else
+	log "FINAL STATUS: OK"
+	exit 0
+fi
+}
+main
