@@ -29,6 +29,7 @@ log_rotation(){
 if [[ $log_file_size -gt 1048576 ]]
 then
 	> "$logfile"
+	log "OK: Log rotation completed."
 else
 
 	log "OK : Log size is normal no need for rotation."
@@ -132,6 +133,13 @@ log "swap_total : $swap_total KB  used : $swap_used KB  available: $swap_free KB
 ## Function for CPU usage
 cpu_usage(){
 log "Checking cpu Usage...................."
+
+##mpstat Command validation
+command -v mpstat > /dev/null || {
+log "mpstat command not installed."
+return
+}
+
 cpu_idle=$(mpstat | awk 'NR==4 {print $NF}'| cut -d. -f1)
 cpu_used=$(( 100 - $cpu_idle ))
 if [[ $cpu_used -gt 80 ]]
@@ -188,3 +196,40 @@ else
 fi
 }
 main
+
+#using while and case with "getopts" option to make script work with
+#providing arguments
+
+while getopts "hdcmsa" opt;do
+	case $opt in
+		d)
+		  disk_usage
+		  ;;
+		c)
+		  cpu_usage
+	          ;;
+		m)
+		  memory_usage
+		  ;;
+		s)
+		  swap_usage
+		  ;;
+		a)
+		  disk_usage
+		  cpu_usage
+		  memory_usage
+		  swap_usage
+		  load_average
+		  top_processes
+		  ;;
+		h)
+		  echo "Usage: ./server_health_2.sh -d[disk],c[cpu],m[memory],s[swap],a[all]"
+		  exit 0
+		  ;;
+		*)
+		  echo "Invalid Option"
+                  exit 1
+		  ;;
+
+	esac
+done
